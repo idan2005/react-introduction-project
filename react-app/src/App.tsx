@@ -1,10 +1,12 @@
-import Message from "./Message";
-import ListGroup from "./ListGroup";
+import Message from "./practice/Message";
+import ListGroup from "./practice/ListGroup";
 function App() {
+  let items = ["New York", "Los Angeles", "Chicago"];
+
   return (
     <div>
       <Message></Message>
-      <ListGroup></ListGroup>
+      <ListGroup items={items} heading="Cities"></ListGroup>
     </div>
   );
 }

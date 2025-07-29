@@ -1,7 +1,6 @@
 # React Introduction Project
 
 A simple React application built with TypeScript and Vite as part of learning React fundamentals.
-
 ## Features
 
 - Simple ListGroup component displaying cities
@@ -30,6 +29,7 @@ npm install
 
 3. Start the development server:
 ```bash
+cd react-app
 npm run dev
 ```
 

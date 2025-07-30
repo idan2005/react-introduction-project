@@ -3,13 +3,12 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 
 export interface Project {
   id?: number;
-  title: string;
+  name: string;
   description?: string;
-  ownerName?: string;
-  createdAt?: string;
-  todoList?: [];
+  owner: string;
+  todoList: [];
   inProgressList?: [];
-  doneList?: [];
+  doneList: [];
 }
 
 interface ApiResponse<T = any> {
@@ -46,11 +45,10 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}): Promise<
 const getProjects = async (): Promise<ApiResponse<Project[]>> => {
   try {
     const response = await apiRequest('/projects');
-    
     return {
       success: true,
       message: 'Projects fetched successfully',
-      data: response.projects
+      data: response
     };
   } catch (error: any) {
     return {
@@ -97,8 +95,29 @@ const removeProject = async (projectId: string): Promise<ApiResponse> => {
   }
 };
 
+const updateProject = async (projectId: string, projectData: Partial<Omit<Project, 'id'>>): Promise<ApiResponse<Project>> => {
+  try {
+    const response = await apiRequest(`/projects/${projectId}`, {
+      method: 'PUT',
+      body: JSON.stringify(projectData)
+    });
+
+    return {
+      success: true,
+      message: 'Project updated successfully',
+      data: response
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'Failed to update project'
+    };
+  }
+};
+
 export const ProjectUtils = {
   getProjects,
   addProject,
-  removeProject
+  removeProject,
+  updateProject
 };

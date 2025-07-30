@@ -6,15 +6,20 @@ import { Project as ProjectType } from '../../Services/ProjectService'
 interface RemovableProjectProps {
   project: ProjectType;
   onRemove: (id: number) => void;
+  onUpdate?: (project: ProjectType) => void; // Optional update handler
 }
 
 const RemovableProject = ({ project, onRemove }: RemovableProjectProps) => {
   return (
+    console.log('Rendering RemovableProject:', project),
     <li className="border p-4 rounded-lg shadow-sm bg-white">
       <Project 
-        title={project.title}
+        name={project.name}
         description={project.description || ''} 
-        owner={project.ownerName?.toString() || 'Unknown'}
+        owner={project.owner?.toString() || 'Unknown'}
+        todoList={project.todoList || []}
+        inProgressList={project.inProgressList || []}
+        doneList={project.doneList || []}
       />
       <Button 
         variant="destructive" 

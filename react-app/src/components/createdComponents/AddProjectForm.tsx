@@ -5,21 +5,21 @@ import { Project } from '../../Services/ProjectService'
 import { UserUtils, User } from '../../Services/UserService'
 
 interface AddProjectFormProps {
-  onAddProject: (project: Omit<Project, 'id' | 'createdAt'>) => void;
+  onAddProject: (project: Omit<Project, 'id'>) => void;
   onCancel: () => void;
 }
 
 const AddProjectForm = ({ onAddProject, onCancel }: AddProjectFormProps) => {
   const [formData, setFormData] = useState({
-    title: '',
+    name: '',
     description: '',
-    ownerName: ''
+    owner: ''
   });
 
   const [errors, setErrors] = useState({
-    title: '',
+    name: '',
     description: '',
-    ownerName: ''
+    owner: ''
   });
 
   const [users, setUsers] = useState<User[]>([]);
@@ -45,19 +45,19 @@ const AddProjectForm = ({ onAddProject, onCancel }: AddProjectFormProps) => {
 
   const validateForm = () => {
     const newErrors = {
-      title: '',
+      name: '',
       description: '',
-      ownerName: ''
+      owner: ''
     };
 
-    if (!formData.title.trim()) {
-      newErrors.title = 'Project title is required';
+    if (!formData.name.trim()) {
+      newErrors.name = 'Project name is required';
     }
     if (!formData.description.trim()) {
       newErrors.description = 'Project description is required';
     }
-    if (!formData.ownerName.trim()) {
-      newErrors.ownerName = 'Project owner is required';
+    if (!formData.owner.trim()) {
+      newErrors.owner = 'Project owner is required';
     }
 
     setErrors(newErrors);
@@ -69,12 +69,15 @@ const AddProjectForm = ({ onAddProject, onCancel }: AddProjectFormProps) => {
     
     if (validateForm()) {
       onAddProject({
-        title: formData.title.trim(),
+        name: formData.name.trim(),
         description: formData.description.trim(),
-        ownerName: formData.ownerName.trim()
+        owner: formData.owner.trim(),
+        todoList: [],
+        inProgressList: [],
+        doneList: []
       });
-      
-      setFormData({ title: '', description: '', ownerName: '' });
+
+      setFormData({ name: '', description: '', owner: '' });
     }
   };
 
@@ -92,16 +95,16 @@ const AddProjectForm = ({ onAddProject, onCancel }: AddProjectFormProps) => {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Project Title</label>
+            <label className="block text-sm font-medium mb-1">Project name</label>
             <Input
               type="text"
-              value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
-              placeholder="Enter project title"
-              className={errors.title ? 'border-red-500' : ''}
+              value={formData.name}
+              onChange={(e) => handleInputChange('name', e.target.value)}
+              placeholder="Enter project name"
+              className={errors.name ? 'border-red-500' : ''}
             />
-            {errors.title && (
-              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
             )}
           </div>
 
@@ -126,10 +129,10 @@ const AddProjectForm = ({ onAddProject, onCancel }: AddProjectFormProps) => {
               <div className="text-sm text-gray-500">Loading users...</div>
             ) : (
               <select
-                value={formData.ownerName}
-                onChange={(e) => handleInputChange('ownerName', e.target.value)}
+                value={formData.owner}
+                onChange={(e) => handleInputChange('owner', e.target.value)}
                 className={`w-full px-3 py-2 border rounded-md ${
-                  errors.ownerName ? 'border-red-500' : 'border-gray-300'
+                  errors.owner ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
                 <option value="">Select project owner</option>
@@ -140,8 +143,8 @@ const AddProjectForm = ({ onAddProject, onCancel }: AddProjectFormProps) => {
                 ))}
               </select>
             )}
-            {errors.ownerName && (
-              <p className="text-red-500 text-sm mt-1">{errors.ownerName}</p>
+            {errors.owner && (
+              <p className="text-red-500 text-sm mt-1">{errors.owner}</p>
             )}
           </div>
 

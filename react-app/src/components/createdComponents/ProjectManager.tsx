@@ -19,7 +19,6 @@ const ProjectManager = () => {
     setError('');
     
     const result = await ProjectUtils.getProjects();
-    
     if (result.success) {
       setProjects(result.data || []);
     } else {
@@ -29,7 +28,7 @@ const ProjectManager = () => {
     setIsLoading(false);
   };
 
-  const handleAddProject = async (projectData: Omit<Project, 'id' | 'createdAt'>) => {
+  const handleAddProject = async (projectData: Omit<Project, 'id'>) => {
     setIsLoading(true);
     setError('');
 

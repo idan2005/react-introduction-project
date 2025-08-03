@@ -50,15 +50,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
-      <div className="max-w-md mx-auto mb-4">
-        <button 
-          onClick={() => setCurrentView('projects')}
-          className="w-full text-center text-blue-500 hover:underline mb-4"
-        >
-          View Projects Demo (Skip Auth) →
-        </button>
-      </div>
+    <div className="min-h-screen bg-gray-100 py-8 mx-auto">
       {showRegister ? (
         <RegisterForm 
           onSwitchToLogin={() => setShowRegister(false)} 

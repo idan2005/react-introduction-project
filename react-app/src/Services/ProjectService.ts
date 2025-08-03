@@ -58,7 +58,7 @@ const getProjects = async (): Promise<ApiResponse<Project[]>> => {
   }
 };
 
-const addProject = async (projectData: Omit<Project, 'id' | 'createdAt'>): Promise<ApiResponse<Project>> => {
+const addProject = async (projectData: Omit<Project, 'id'>): Promise<ApiResponse<Project>> => {
   try {
     const response = await apiRequest('/projects', {
       method: 'POST',
@@ -95,29 +95,8 @@ const removeProject = async (projectId: string): Promise<ApiResponse> => {
   }
 };
 
-const updateProject = async (projectId: string, projectData: Partial<Omit<Project, 'id'>>): Promise<ApiResponse<Project>> => {
-  try {
-    const response = await apiRequest(`/projects/${projectId}`, {
-      method: 'PUT',
-      body: JSON.stringify(projectData)
-    });
-
-    return {
-      success: true,
-      message: 'Project updated successfully',
-      data: response
-    };
-  } catch (error: any) {
-    return {
-      success: false,
-      message: error.message || 'Failed to update project'
-    };
-  }
-};
-
 export const ProjectUtils = {
   getProjects,
   addProject,
-  removeProject,
-  updateProject
+  removeProject
 };

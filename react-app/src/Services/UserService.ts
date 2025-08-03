@@ -24,9 +24,7 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}): Promise<
       },
       ...options,
     });
-
     const data = await response.json();
-    
     if (!response.ok) {
       throw new Error(data.message || `HTTP error! status: ${response.status}`);
     }
@@ -89,14 +87,14 @@ const loginUser = async (name: string, password: string): Promise<ApiResponse<st
   }
 };
 
-const getUserById = async (userId: string): Promise<ApiResponse<User>> => {
+const getUserById = async (userId: number): Promise<ApiResponse<User>> => {
   try {
     const response = await apiRequest(`/users/${userId}`);
     
     return {
       success: true,
       message: 'User fetched successfully',
-      data: response.user
+      data: response
     };
   } catch (error: any) {
     return {
@@ -113,7 +111,7 @@ const getAllUsers = async (): Promise<ApiResponse<User[]>> => {
     return {
       success: true,
       message: 'Users fetched successfully',
-      data: response.users || response // Handle different response formats
+      data: response.users || response 
     };
   } catch (error: any) {
     return {
@@ -122,11 +120,28 @@ const getAllUsers = async (): Promise<ApiResponse<User[]>> => {
     };
   }
 };
-
+const getIdFromToken = async (token: string): Promise<ApiResponse<number>> => {
+  try {
+    const response = await apiRequest(`/users/decode-token/${token}`);
+    return {
+      success: true,
+      message: 'UserId fetched successfully',
+      data: response
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'Failed to fetch user'
+    };
+  }
+};
 
 export const UserUtils = {
   registerUser,
   loginUser,
   getUserById,
-  getAllUsers
+  getAllUsers,
+  getIdFromToken
 };
+
+export default UserUtils;

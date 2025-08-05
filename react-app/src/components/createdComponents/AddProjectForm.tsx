@@ -1,15 +1,25 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../ui/dialog"
 import { Project } from '../../Services/ProjectService'
 import { UserUtils, User } from '../../Services/UserService'
+import { Textarea } from '../ui/textarea'
+import UserSelect from './UserSelect'
 
 interface AddProjectFormProps {
   onAddProject: (project: Omit<Project, 'id'>) => void;
   onCancel: () => void;
+  open: boolean;
 }
 
-const AddProjectForm = ({ onAddProject, onCancel }: AddProjectFormProps) => {
+const AddProjectForm = ({ onAddProject, onCancel, open }: AddProjectFormProps) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -29,7 +39,6 @@ const AddProjectForm = ({ onAddProject, onCancel }: AddProjectFormProps) => {
     const fetchUsers = async () => {
       try {
         const result = await UserUtils.getAllUsers();
-        console.log(result);
         if (result.success && result.data) {
           setUsers(result.data);
         }
@@ -89,9 +98,14 @@ const AddProjectForm = ({ onAddProject, onCancel }: AddProjectFormProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <h2 className="text-xl font-bold mb-4">Add New Project</h2>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add New Project</DialogTitle>
+          <DialogDescription>
+            Fill in the details below to create a new project.
+          </DialogDescription>
+        </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -110,7 +124,7 @@ const AddProjectForm = ({ onAddProject, onCancel }: AddProjectFormProps) => {
 
           <div>
             <label className="block text-sm font-medium mb-1">Description</label>
-            <textarea
+            <Textarea
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="Enter project description"
@@ -123,30 +137,13 @@ const AddProjectForm = ({ onAddProject, onCancel }: AddProjectFormProps) => {
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Project Owner</label>
-            {isLoadingUsers ? (
-              <div className="text-sm text-gray-500">Loading users...</div>
-            ) : (
-              <select
-                value={formData.owner}
-                onChange={(e) => handleInputChange('owner', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md ${
-                  errors.owner ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Select project owner</option>
-                {users.map((user) => (
-                  <option key={user.id || user.name} value={user.name}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
-            )}
-            {errors.owner && (
-              <p className="text-red-500 text-sm mt-1">{errors.owner}</p>
-            )}
-          </div>
+          <UserSelect
+            value={formData.owner}
+            onChange={(value) => handleInputChange('owner', value)}
+            error={errors.owner}
+            placeholder='Select project owner'
+            label='Project Owner'
+          />
 
           <div className="flex gap-2 pt-4">
             <Button type="submit" className="flex-1">
@@ -162,8 +159,8 @@ const AddProjectForm = ({ onAddProject, onCancel }: AddProjectFormProps) => {
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

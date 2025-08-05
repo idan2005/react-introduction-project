@@ -66,3 +66,13 @@ This is a learning project, but feel free to suggest improvements!
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).
+
+
+
+
+
+
+add button that move to a new page having:
+-a table with the tasks - for each task have a name, assigned user, list name
+-add the owner name to the bottom of the new page
+change the http request to use axios instead of fetch

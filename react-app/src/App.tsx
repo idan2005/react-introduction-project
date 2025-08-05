@@ -2,6 +2,7 @@ import { useState } from "react";
 import RegisterForm from "./components/createdComponents/Registerform";
 import LoginForm from "./components/createdComponents/LoginForm";
 import ProjectManager from "./components/createdComponents/ProjectManager";
+import Header from "./components/createdComponents/Header";
 
 function App() {
   const [currentView, setCurrentView] = useState<'auth' | 'projects'>('auth');
@@ -30,19 +31,10 @@ function App() {
     return (
       <div className="min-h-screen bg-gray-100 py-8">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-4 flex justify-between items-center">
-            <button 
-              onClick={handleLogout}
-              className="text-blue-500 hover:underline"
-            >
-              ← Logout
-            </button>
-            {currentUser && (
-              <div className="text-gray-600">
-                Welcome, <span className="font-semibold">{currentUser}</span>!
-              </div>
-            )}
-          </div>
+          <Header 
+            currentUser={currentUser}
+            onLogout={handleLogout}
+          />
           <ProjectManager />
         </div>
       </div>

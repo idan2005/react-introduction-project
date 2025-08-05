@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
-import RemovableProject from './RemovableProject'
+import ModifiedProject from './ModifiedProject'
 import { Project } from '../../Services/ProjectService'
 import { UserUtils } from '../../Services/UserService'
 
 interface ProjectsProps {
   projects: Project[];
   onRemoveProject: (id: number) => void;
+  openProject: (project: Project) => void;
 }
 
-const Projects = ({ projects, onRemoveProject }: ProjectsProps) => {
+const Projects = ({ projects, onRemoveProject, openProject }: ProjectsProps) => {
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
@@ -42,10 +43,11 @@ const Projects = ({ projects, onRemoveProject }: ProjectsProps) => {
   return (
     <ul className="space-y-4">
       {projects.map((project) => (
-        <RemovableProject
+        <ModifiedProject
           key={project.id}
           project={project}
           onRemove={onRemoveProject}
+          openProject={openProject}
           currentUser={currentUser ? currentUser.name.toString() : undefined}
         />
       ))}

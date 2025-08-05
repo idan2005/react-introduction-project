@@ -1,14 +1,23 @@
+
 const API_BASE_URL = 'http://127.0.0.1:8000';
 
 
 export interface Project {
   id?: number;
   name: string;
-  description?: string;
+  description: string;
   owner: string;
   todoList: [];
   inProgressList?: [];
   doneList: [];
+}
+
+export interface Task{ 
+    id?: string;
+    name: string;
+    assignedTo: string[];
+    description?: string;
+    status: 'todoList' | 'inProgressList' | 'doneList';
 }
 
 interface ApiResponse<T = any> {
@@ -95,8 +104,28 @@ const removeProject = async (projectId: string): Promise<ApiResponse> => {
   }
 };
 
+const createTask = async (projectId: number, task: Task): Promise<ApiResponse<Task>> => {
+  try {
+    const response = await apiRequest(`/projects/${projectId}/tasks/${task.status}`, {
+      method: 'POST',
+      body: JSON.stringify(task)
+    });
+    return {
+      success: true,
+      message: 'Task created successfully',
+      data: response
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'Failed to create task'
+    };
+  }
+};
+
 export const ProjectUtils = {
   getProjects,
   addProject,
-  removeProject
+  removeProject,
+  createTask
 };

@@ -16,10 +16,12 @@ interface ApiResponse<T = any> {
 const apiRequest = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
+    const token = localStorage.getItem('jwt_token');
     
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options.headers,
       },
       ...options,

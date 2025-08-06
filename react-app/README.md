@@ -1,3 +1,7 @@
+# In order to activate the server:
+
+cd react-app
+npm run dev
 # React Introduction Project
 
 A simple React application built with TypeScript and Vite as part of learning React fundamentals.

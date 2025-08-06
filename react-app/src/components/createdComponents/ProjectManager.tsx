@@ -69,6 +69,7 @@ const ProjectManager = () => {
 
   const closeProjectTable = () => {
     setSelectedProject(null);
+    loadProjects();
   };
   
   return (

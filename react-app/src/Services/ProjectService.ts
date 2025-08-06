@@ -123,9 +123,28 @@ const createTask = async (projectId: number, task: Task): Promise<ApiResponse<Ta
   }
 };
 
+const updateTaskStatus = async (projectId: number, taskId: string, fromStatus: 'todoList' | 'inProgressList' | 'doneList', toStatus: 'todoList' | 'inProgressList' | 'doneList'): Promise<ApiResponse<any>> => {
+  try {
+    const response = await apiRequest(`/projects/${projectId}/tasks/move/${taskId}/${fromStatus}/${toStatus}`, {
+      method: 'POST'
+    });
+    return {
+      success: true,
+      message: 'Task moved successfully',
+      data: response
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'Failed to move task'
+    };
+  }
+};
+
 export const ProjectUtils = {
   getProjects,
   addProject,
   removeProject,
-  createTask
+  createTask,
+  updateTaskStatus
 };

@@ -60,6 +60,25 @@ const ProjectTable = ({ project, onClose }: ProjectTableProps) => {
         }
     };
 
+    const updateTaskStatus = async (taskId: string, fromStatus: 'todoList' | 'inProgressList' | 'doneList', toStatus: 'todoList' | 'inProgressList' | 'doneList') => {
+        if(project.id === undefined) {
+            console.error('Project ID is undefined');
+            return;
+        }
+        
+        const result = await ProjectUtils.updateTaskStatus(project.id, taskId, fromStatus, toStatus);
+        
+        if (result.success) {
+            setTasks(prevTasks => 
+                prevTasks.map(task => 
+                    task.id === taskId ? { ...task, status: toStatus } : task
+                )
+            );
+        } else {
+            alert(`Failed to update task status: ${result.message}`);
+        }
+    };
+
     const allTasks = tasks.map((task: Task) => {
         let listName = 'To Do';
         if (task.status === 'inProgressList') listName = 'In Progress';
@@ -106,18 +125,19 @@ const ProjectTable = ({ project, onClose }: ProjectTableProps) => {
                 label='Assign A User'
                 placeholder='Assigned User'
             />
-            <div className="flex flex-col gap-1">
+            {/* <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium">Status</label>
                 <select
                     value={newTask.status}
-                    onChange={(e) => setNewTask(prev => ({ ...prev, status: e.target.value as 'todoList' | 'inProgressList' | 'doneList' }))}
+                    onChange={(e) => setNewTask(prev => ({ ...prev, status: e.target.value as
+                         'todoList' | 'inProgressList' | 'doneList' }))}
                     className="w-full px-3 py-2 border rounded-md border-gray-300"
                 >
                     <option value="todoList">To Do</option>
                     <option value="inProgressList">In Progress</option>
                     <option value="doneList">Done</option>
                 </select>
-            </div>
+            </div> */}
         </div>
         <Table>
             <TableHeader>
@@ -146,13 +166,24 @@ const ProjectTable = ({ project, onClose }: ProjectTableProps) => {
                                     : task.assignedTo || 'Unassigned'
                                 }
                             </TableCell>
-                            <TableCell>{task.listName}</TableCell>
+                            <TableCell>
+                                <select
+                                    value={task.status}
+                                    onChange={(e) => task.id && updateTaskStatus(task.id, task.status, e.target.value as 'todoList' | 'inProgressList' | 'doneList')}
+                                    className="w-full px-2 py-1 border rounded text-sm"
+                                    disabled={!task.id}
+                                >
+                                    <option value="todoList">To Do</option>
+                                    <option value="inProgressList">In Progress</option>
+                                    <option value="doneList">Done</option>
+                                </select>
+                            </TableCell>
                         </TableRow>
                     ))
                 )}
             </TableBody>
         </Table>
-        <p className="text-sm text-gray-500 mt-200 text-center">Owner: {project.owner}</p>
+        <p className="text-sm text-gray-500 mt-5 text-center">Owner: {project.owner}</p>
     </div>
   )
 }

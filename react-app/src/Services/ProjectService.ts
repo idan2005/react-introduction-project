@@ -1,3 +1,4 @@
+import axios, { AxiosRequestConfig } from "axios";
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
 
@@ -26,25 +27,21 @@ interface ApiResponse<T = any> {
   data?: T;
 }
 
-const apiRequest = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
+const apiRequest = async (endpoint: string, options: AxiosRequestConfig = {}): Promise<any> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
     
-    const response = await fetch(url, {
+    const response = await axios({
+      url,
+      ...options,
       headers: {
         'Content-Type': 'application/json',
-        ...options.headers,
+        ...(options.headers || {}),
       },
-      ...options,
     });
 
-    const data = await response.json();
+    return response.data;
 
-    if (!response.ok) {
-      throw new Error(data.message || `HTTP error! status: ${response.status}`);
-    }
-
-    return data;
   } catch (error) {
     console.error('API Request Error:', error);
     throw error;
@@ -71,7 +68,7 @@ const addProject = async (projectData: Omit<Project, 'id'>): Promise<ApiResponse
   try {
     const response = await apiRequest('/projects', {
       method: 'POST',
-      body: JSON.stringify(projectData)
+      data: projectData
     });
     return {
       success: true,
@@ -108,7 +105,7 @@ const createTask = async (projectId: number, task: Task): Promise<ApiResponse<Ta
   try {
     const response = await apiRequest(`/projects/${projectId}/tasks/${task.status}`, {
       method: 'POST',
-      body: JSON.stringify(task)
+      data: task
     });
     return {
       success: true,

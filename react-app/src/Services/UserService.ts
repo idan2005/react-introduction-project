@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
 
@@ -14,125 +14,137 @@ interface ApiResponse<T = any> {
   message: string;
   data?: T;
 }
+interface AuthResponse {
+  access_token: string;
+  [key: string]: any;
+}
+const createApiClient = (): AxiosInstance => {
+  const client = axios.create({
+    baseURL: API_BASE_URL,
+    timeout: 10000,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-const apiRequest = async (endpoint: string, options: AxiosRequestConfig = {}): Promise<any> => {
-  try {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const response = await axios({
-      url,
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options.headers || {}),
-      },
-    });
+  client.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('jwt_token');
+      
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
 
-    return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || `HTTP error! status: ${error.response.status}`);
-    } else {
-      throw error;
+      return config;
+    },
+    (error) => {
+      console.error('Request interceptor error:', error);
+      return Promise.reject(error);
     }
-  }
+  );
+
+  client.interceptors.response.use(
+    (response) => {
+      return response.data;
+    },
+    (error) => {
+      if (error.response?.status === 401) {
+        // Token expired or invalid - clear it and redirect to login
+        localStorage.removeItem('jwt_token');
+        console.error('Authentication failed - token cleared');
+      }
+      
+      console.error('API Error:', error.response?.data || error.message);
+      
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw new Error(error.message || 'Network error');
+    }
+  );
+
+  return client;
 };
 
-const registerUser = async (name: string, password: string): Promise<ApiResponse<string>> => {
-  try {
-    const userData = {
-      name: name.trim(),
-      password: password.trim(),
-    };
+const api = createApiClient();
 
-    const response = await apiRequest('/users/register', {
-      method: 'POST',
-      data: userData, 
-    });
-
-    return {
+const wrapApiCall = <T>(
+  apiCall: Promise<any>,
+  successMessage: string,
+  errorMessage: string
+): Promise<ApiResponse<T>> => {
+  return apiCall
+    .then(response => ({
       success: true,
-      message: 'User registered successfully',
-      data: response.access_token,
-    };
-  } catch (error: any) {
-    return {
+      message: successMessage,
+      data: response,
+    }))
+    .catch(error => ({
       success: false,
-      message: error.message || 'Registration failed',
-    };
-  }
+      message: error.message || errorMessage,
+    }));
 };
 
-const loginUser = async (name: string, password: string): Promise<ApiResponse<string>> => {
-  try {
+// Removed old apiRequest function - using the new api client instead
+
+const registerUser = (name: string, password: string): Promise<ApiResponse<string>> => {
+  const userData = {
+    name: name.trim(),
+    password: password.trim(),
+  };
+  
+  return wrapApiCall<AuthResponse>(
+    api.post('/users/register', userData),
+    'User registered successfully',
+    'Registration failed'
+  ).then(result => ({
+    ...result,
+    data: result.success ? result.data?.access_token : undefined
+  }));
+};
+
+
+const loginUser = (name: string, password: string): Promise<ApiResponse<string>> => {
     const loginData = {
       name: name.trim(),
       password: password.trim(),
     };
 
-    const response = await apiRequest('/users/login', {
-      method: 'POST',
-      data: loginData,
-    });
-
-    return {
-      success: true,
-      message: 'Login successful',
-      data: response.access_token,
-    };
-  } catch (error: any) {
-    return {
-      success: false,
-      message: error.message || 'Login failed',
-    };
+    return wrapApiCall<AuthResponse>(
+      api.post('/users/login', loginData),
+      'Login successful',
+      'Login failed'
+    ).then(result => ({
+      ...result,
+      data: result.success ? result.data?.access_token : undefined
+    }));
   }
+
+const getUserById = (userId: number): Promise<ApiResponse<User>> => {
+  return wrapApiCall<User>(
+    api.get(`/users/${userId}`),
+    'User fetched successfully',
+    'Failed to fetch user'
+  );
 };
 
-const getUserById = async (userId: number): Promise<ApiResponse<User>> => {
-  try {
-    const response = await apiRequest(`/users/${userId}`);
-    return {
-      success: true,
-      message: 'User fetched successfully',
-      data: response,
-    };
-  } catch (error: any) {
-    return {
-      success: false,
-      message: error.message || 'Failed to fetch user',
-    };
-  }
+const getAllUsers = (): Promise<ApiResponse<User[]>> => {
+  return wrapApiCall<{ users: User[] } | User[]>(
+    api.get('/users'),
+    'Users fetched successfully',
+    'Failed to fetch users'
+  ).then(result => ({
+    ...result,
+    data: result.success ? (Array.isArray(result.data) ? result.data : result.data?.users) : undefined
+  }));
 };
 
-const getAllUsers = async (): Promise<ApiResponse<User[]>> => {
-  try {
-    const response = await apiRequest('/users');
-    return {
-      success: true,
-      message: 'Users fetched successfully',
-      data: response.users || response,
-    };
-  } catch (error: any) {
-    return {
-      success: false,
-      message: error.message || 'Failed to fetch users',
-    };
-  }
-};
-
-const getIdFromToken = async (token: string): Promise<ApiResponse<number>> => {
-  try {
-    const response = await apiRequest(`/users/decode-token/${token}`);
-    return {
-      success: true,
-      message: 'UserId fetched successfully',
-      data: response,
-    };
-  } catch (error: any) {
-    return {
-      success: false,
-      message: error.message || 'Failed to fetch user',
-    };
-  }
+const getIdFromToken = (token: string): Promise<ApiResponse<number>> => {
+  return wrapApiCall<number>(
+    api.get(`/users/decode-token/${token}`),
+    'UserId fetched successfully',
+    'Failed to fetch user'
+  );
 };
 
 export const UserUtils = {

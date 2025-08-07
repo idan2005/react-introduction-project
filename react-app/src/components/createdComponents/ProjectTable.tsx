@@ -125,19 +125,6 @@ const ProjectTable = ({ project, onClose }: ProjectTableProps) => {
                 label='Assign A User'
                 placeholder='Assigned User'
             />
-            {/* <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium">Status</label>
-                <select
-                    value={newTask.status}
-                    onChange={(e) => setNewTask(prev => ({ ...prev, status: e.target.value as
-                         'todoList' | 'inProgressList' | 'doneList' }))}
-                    className="w-full px-3 py-2 border rounded-md border-gray-300"
-                >
-                    <option value="todoList">To Do</option>
-                    <option value="inProgressList">In Progress</option>
-                    <option value="doneList">Done</option>
-                </select>
-            </div> */}
         </div>
         <Table>
             <TableHeader>
